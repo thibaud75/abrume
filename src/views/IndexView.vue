@@ -202,6 +202,9 @@ export default {
 .column {
   flex: 0 0 25%; /* Chaque colonne occupe 25% de l'espace */
   margin-right: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .image-container {
