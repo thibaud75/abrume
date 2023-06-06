@@ -12,14 +12,22 @@
       </div>
     </div>
 
-    <div class="image-grid">
-      <div v-for="(column, index) in columns" :key="index" class="column">
-        <div v-for="image in column" :key="image" class="image-container">
-          <img
-            :src="require(`@/assets/images/home/${image}`)"
-            alt="Image"
-            class="image"
-          />
+    <div class="scrollable">
+      <div class="image-grid" ref="imageGrid">
+        <div class="columns-container">
+          <div v-for="(column, index) in columns" :key="index" class="column">
+            <div
+              v-for="(image, imageIndex) in column"
+              :key="imageIndex"
+              class="image-container"
+            >
+              <img
+                :src="require(`@/assets/images/home/${image}`)"
+                alt="Image"
+                class="image"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -31,10 +39,9 @@ export default {
   data() {
     return {
       images: [
-        // List of image filenames
+        // Liste des noms de fichier des images
         // Les images sont affichées en colonne de deux
-        // Si tu veux changer les images, les premières sont les premières de la colonne
-
+        // Si vous voulez changer les images, les premières sont les premières de la colonne
         "abrimoitie.png",
         "cabaneloin.jpg",
         "abrinoir.png",
@@ -43,39 +50,80 @@ export default {
         "boissombre.jpg",
         "boislac.jpg",
         "abriblanc.png",
+        "vosges1.jpg",
+        "vosges2.jpg",
+        "vosges3.jpg",
+        "vosges4.jpg",
+        "vosges5.jpg",
+        "boissombre.jpg",
+        "abrimoitie.png",
+        "cabaneloin.jpg",
+        "abrinoir.png",
+        "abriarbre.jpg",
+        "bgabrume.jpg",
+        "boissombre.jpg",
+        "abrimoitie.png",
+        "cabaneloin.jpg",
+        "abrinoir.png",
+        "abriarbre.jpg",
+        "bgabrume.jpg",
+        "boissombre.jpg",
+        "abrimoitie.png",
+        "cabaneloin.jpg",
+        "abrinoir.png",
+        "abriarbre.jpg",
+        "bgabrume.jpg",
+        "boissombre.jpg",
+        // Ajoutez vos autres images ici
       ],
       columns: [],
+      imagesPerColumn: 6,
     };
   },
   mounted() {
-    this.columns = this.generateColumns(this.images, 4);
+    this.generateColumns(this.images, this.imagesPerColumn);
   },
   methods: {
-    generateColumns(images, numColumns) {
+    generateColumns(images, imagesPerColumn) {
       const columns = [];
+      let currentColumn = [];
       let columnIndex = 0;
 
       for (let i = 0; i < images.length; i++) {
-        if (!columns[columnIndex]) {
-          columns[columnIndex] = [];
-        }
+        currentColumn.push(images[i]);
 
-        columns[columnIndex].push(images[i]);
-        columnIndex = (columnIndex + 1) % numColumns;
+        if (currentColumn.length === imagesPerColumn) {
+          columns.push(currentColumn);
+          currentColumn = [];
+          columnIndex++;
+        }
       }
 
-      return columns;
+      if (currentColumn.length > 0) {
+        columns.push(currentColumn);
+        columnIndex++;
+      }
+
+      // Remplir les colonnes restantes avec des tableaux vides
+      while (columnIndex < 4) {
+        columns.push([]);
+        columnIndex++;
+      }
+
+      this.columns = columns;
     },
+
     scrollLeft() {
-      this.scrollWithAnimation(-100, 0);
+      this.scrollWithAnimationHorizontal(-400, 0, this.$refs.imageGrid);
     },
     scrollRight() {
-      this.scrollWithAnimation(100, 0);
+      this.scrollWithAnimationHorizontal(400, 0, this.$refs.imageGrid);
     },
     scrollDown() {
-      this.scrollWithAnimation(0, window.innerHeight - 100);
+      this.scrollWithAnimationVertical(0, 600);
     },
-    scrollWithAnimation(dx, dy) {
+
+    scrollWithAnimationVertical(dx, dy) {
       const startX = window.scrollX;
       const startY = window.scrollY;
       const targetX = startX + dx;
@@ -99,6 +147,29 @@ export default {
 
       requestAnimationFrame(animateScroll);
     },
+    scrollWithAnimationHorizontal(dx, dy, target) {
+      const duration = 1000; // Durée de l'animation en millisecondes
+      const startTime = performance.now();
+      const startX = target.scrollLeft;
+      const startY = target.scrollTop;
+
+      const animateScroll = (timestamp) => {
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = this.easeInOutQuad(progress);
+        const currentX = startX + dx * easeProgress;
+        const currentY = startY + dy * easeProgress;
+
+        target.scroll(currentX, currentY);
+
+        if (elapsed < duration) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+
+      requestAnimationFrame(animateScroll);
+    },
+
     easeInOutQuad(t) {
       return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
     },
@@ -113,18 +184,24 @@ export default {
   justify-content: center;
   align-items: center;
   position: relative;
+  height: auto;
+  overflow-y: auto;
 }
 
 .image-grid {
   display: flex;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap; /* Empêche le retour à la ligne des colonnes */
 }
 
+.columns-container {
+  display: inline-flex; /* Affiche les colonnes en ligne */
+}
 .column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+  flex: 0 0 25%; /* Chaque colonne occupe 25% de l'espace */
+  margin-right: 10px;
 }
 
 .image-container {
