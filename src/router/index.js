@@ -18,6 +18,10 @@ import Member from "@/views/Contribute/MemberView.vue";
 import Donate from "@/views/Contribute/DonateView.vue";
 import Newsletter from "@/views/Contribute/NewsletterView.vue";
 
+// Excursion
+import Excursion from "@/views/Excursion/ExcursionView.vue";
+import Zone from "@/views/Excursion/ZoneView.vue";
+
 const routes = [
   {
     path: "/",
@@ -41,12 +45,14 @@ const routes = [
   {
     path: "/excursion",
     name: "excursion",
-    // route level code-splitting
-    // this generates a separate chunk (inventory.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "inventory" */ "../views/ExcursionView.vue"),
+    component: Excursion,
+    children: {
+      path: ":id",
+      name: "zone",
+      component: Zone,
+    },
   },
+
   {
     path: "/about",
     name: "about",

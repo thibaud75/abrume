@@ -25,7 +25,8 @@ export default {
         routePath === "/about/project" ||
         routePath === "/contribute/member" ||
         routePath === "/contribute/donate" ||
-        routePath === "/contribute/newsletter"
+        routePath === "/contribute/newsletter" ||
+        routePath === "/excursion"
       ) {
         return "all-nav";
       } else {
@@ -69,7 +70,7 @@ body {
   color: #2c3e50;
   margin: 0 auto;
   width: 95%;
-  font-family: "PingFang", sans-serif;
+  /* font-family: "PingFang", sans-serif; */
 }
 
 * {
