@@ -1,20 +1,28 @@
 <template>
   <div class="map-container">
-    <img :src="currentImage" alt="Map" class="map-image" @mousemove="handleMouseMove" @mousedown="handleMouseDown" @mouseup="handleMouseUp" />
-    <div class="altitude-gauge">
-      <input
-        type="range"
-        min="0"
-        :max="totalImages"
-        step="200"
-        v-model="altitude"
-        @input="updateImageIndex"
-        class="altitude-slider"
-      />
-      <div class="altitude-label">{{ Math.round(altitude) }}</div>
-    </div>
-    <div class="logo-container">
-      <img src="../assets/Logos/Logo-Abrume-Noir.png" alt="logo Abrume" class="logo" @click="toggleZoom" />
+
+    <video v-if="showVideo" ref="videoElement" class="fullscreen-video" autoplay muted>
+      <source src="../assets/videos/launchmap.mp4" type="video/mp4" />
+    </video>
+
+    <div v-if="!showVideo">
+      <!-- Contenu à afficher après la fin de la vidéo -->
+      <img :src="currentImage" alt="Map" class="map-image" @mousemove="handleMouseMove" @mousedown="handleMouseDown" @mouseup="handleMouseUp" />
+      <div class="altitude-gauge">
+        <input
+          type="range"
+          min="0"
+          :max="totalImages"
+          step="200"
+          v-model="altitude"
+          @input="updateImageIndex"
+          class="altitude-slider"
+        />
+        <div class="altitude-label">{{ Math.round(altitude) }}</div>
+      </div>
+      <div class="logo-container">
+        <img src="../assets/Logos/Logo-Abrume-Noir.png" alt="logo Abrume" class="logo" @click="toggleZoom" />
+      </div>
     </div>
   </div>
 </template>
@@ -23,11 +31,11 @@
 export default {
   data() {
     return {
+      showVideo: true,
       altitude: 0,
       imageInterval: 200,
       totalImages: 4600,
       imageIndex: 0,
-      intervalId: null,
       zoomed: false,
       dragging: false,
       mouseX: 0,
@@ -36,6 +44,10 @@ export default {
       offsetX: 0,
       offsetY: 0,
     };
+  }, 
+  mounted() {
+    this.playVideo();
+    this.$refs.videoElement.addEventListener('ended', this.handleVideoEnded);
   },
   computed: {
     currentImage() {
@@ -43,10 +55,18 @@ export default {
       return imagePath.default || imagePath;
     },
   },
-  mounted() {
-
-  },
   methods: {
+  playVideo() {
+      const videoElement = this.$refs.videoElement;
+      console.log("go")
+      videoElement.play().catch((error) => {
+        // La lecture automatique a été bloquée, affichez le message d'erreur ou demandez à l'utilisateur de lancer la vidéo manuellement
+        console.error('Impossible de lire automatiquement la vidéo :', error);
+      });
+    }, 
+    handleVideoEnded() {
+      this.showVideo = false;
+    },
     updateImageIndex() {
       this.imageIndex = Math.floor(this.altitude / this.imageInterval);
       this.currentImage = require(`@/assets/images/excursion/mapRelief/map-${this.imageIndex * 200}-min.jpg`).default;
@@ -76,7 +96,6 @@ export default {
       this.zoomLevel = this.zoomed ? 2 : 1;
       this.offsetX = 0;
       this.offsetY = 0;
-      console.log("yo")
     },
   },
 };
@@ -86,6 +105,22 @@ export default {
 .map-container {
   position: relative;
   width: fit-content;
+}
+
+.video-container {
+  position: relative;
+  width: fit-content
+
+}
+
+.fullscreen-video {
+  /* width: 100%;
+  height: 100%; */
+  object-fit: cover;
+  max-width: 100%;
+  max-height: 88vh;
+  width: 100vw;
+  display: block;
 }
 
 .map-image {

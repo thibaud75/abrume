@@ -1,6 +1,7 @@
 <template>
   <div>
     <!-- Autres contenus de la page -->
+  
 
     <Excursion />
   </div>
@@ -13,5 +14,6 @@ export default {
   components: {
     Excursion,
   },
+
 };
 </script>
