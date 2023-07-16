@@ -1,11 +1,6 @@
 <template>
   <div class="map-container">
-
-    <video v-if="showVideo" ref="videoElement" class="fullscreen-video" autoplay muted>
-      <source src="../assets/videos/launchmap.mp4" type="video/mp4" />
-    </video>
-
-    <div v-if="!showVideo">
+    <div>
       <!-- Contenu à afficher après la fin de la vidéo -->
       <img :src="currentImage" alt="Map" class="map-image" @mousemove="handleMouseMove" @mousedown="handleMouseDown" @mouseup="handleMouseUp" />
       <div class="altitude-gauge">
@@ -15,7 +10,7 @@
           :max="totalImages"
           step="200"
           v-model="altitude"
-          @input= "updateImageDebounced"
+          @input="updateImageDebounced"
           class="altitude-slider"
         />
         <div class="altitude-label">{{ Math.round(altitude) }}</div>
@@ -33,7 +28,6 @@ import { debounce } from 'lodash';
 export default {
   data() {
     return {
-      showVideo: true,
       altitude: 0,
       imageInterval: 200,
       totalImages: 4600,
@@ -45,11 +39,13 @@ export default {
       zoomLevel: 1,
       offsetX: 0,
       offsetY: 0,
+      animationProgress: 0,
+      animationDuration: 4000, // 4 secondes
+      animationInterval: null,
     };
-  }, 
+  },
   mounted() {
-    this.playVideo();
-    this.$refs.videoElement.addEventListener('ended', this.handleVideoEnded);
+    this.startAnimation();
   },
   computed: {
     currentImage() {
@@ -58,28 +54,26 @@ export default {
     },
   },
   methods: {
-
-
-  updateImageDebounced: debounce(function() {
-    this.imageIndex = Math.floor(this.altitude / this.imageInterval);
-    this.currentImage = require(`@/assets/images/excursion/mapRelief/map-${this.imageIndex * 200}-min.jpg`).default;
-  }, 100), 
-  
-  playVideo() {
-      const videoElement = this.$refs.videoElement;
-      console.log("go")
-      videoElement.play().catch((error) => {
-        // La lecture automatique a été bloquée, affichez le message d'erreur ou demandez à l'utilisateur de lancer la vidéo manuellement
-        console.error('Impossible de lire automatiquement la vidéo :', error);
-      });
-    }, 
-    handleVideoEnded() {
-      this.showVideo = false;
-    },
-    updateImageIndex() {
+    updateImageDebounced: debounce(function() {
       this.imageIndex = Math.floor(this.altitude / this.imageInterval);
-      this.currentImage = require(`@/assets/images/excursion/mapRelief/map-${this.imageIndex * 200}-min.jpg`).default;
+    }, 100),
+
+    startAnimation() {
+      const targetValue = this.totalImages;
+      // const interval = this.animationDuration / targetValue;
+
+      let currentAltitude = 0;
+      this.animationInterval = setInterval(() => {
+        currentAltitude = currentAltitude + 20;
+        if (currentAltitude > targetValue) {
+          clearInterval(this.animationInterval);
+        } else {
+          this.altitude = currentAltitude;
+          this.imageIndex = Math.floor(this.altitude / this.imageInterval);
+        }
+      }, 1);
     },
+
     handleMouseMove(event) {
       if (this.dragging) {
         const deltaX = event.clientX - this.mouseX;
@@ -116,22 +110,6 @@ export default {
   width: fit-content;
 }
 
-.video-container {
-  position: relative;
-  width: fit-content
-
-}
-
-.fullscreen-video {
-  /* width: 100%;
-  height: 100%; */
-  object-fit:fill;
-  max-width: 100%;
-  max-height: 88vh;
-  width: 100vw;
-  display: block;
-}
-
 .map-image {
   display: block;
   max-width: 100%;
@@ -152,7 +130,45 @@ export default {
 
 .altitude-slider {
   width: 200px;
+  height: 2px; /* Hauteur de la jauge */
   margin-bottom: 10px;
+  background-color: #ccc; /* Couleur de fond de la jauge */
+  border-radius: 4px; /* Bordure arrondie de la jauge */
+  outline: none; /* Supprime le contour par défaut de la jauge */
+  -webkit-appearance: none; /* Supprime les styles par défaut de l'élément */
+}
+
+/* Style de la jauge lorsque la souris est dessus */
+.altitude-slider:hover {
+  background-color: #ddd; /* Couleur de fond de la jauge au survol */
+}
+
+/* Style de la jauge lorsqu'elle est active (en cours de manipulation) */
+.altitude-slider:active,
+.altitude-slider:focus {
+  background-color: #aaa; /* Couleur de fond de la jauge lors de l'interaction */
+}
+
+/* Style de la poignée de la jauge */
+.altitude-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Supprime les styles par défaut de la poignée */
+  appearance: none;
+  width: 8px; /* Largeur de la poignée */
+  height: 8px; /* Hauteur de la poignée */
+  border-radius: 50%; /* Forme arrondie de la poignée */
+  background-color: white;
+  border: 1px solid #333;;
+  cursor: pointer;
+}
+
+/* Style de la poignée de la jauge lorsqu'elle est survolée */
+.altitude-slider::-webkit-slider-thumb:hover {
+  background-color: #666; /* Couleur de la poignée au survol */
+}
+
+/* Style de la poignée de la jauge lorsqu'elle est active (en cours de manipulation) */
+.altitude-slider::-webkit-slider-thumb:active {
+  background-color: #000; /* Couleur de la poignée lors de l'interaction */
 }
 
 .altitude-label {
