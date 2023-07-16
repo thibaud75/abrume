@@ -15,7 +15,7 @@
           :max="totalImages"
           step="200"
           v-model="altitude"
-          @input="updateImageIndex"
+          @input= "updateImageDebounced"
           class="altitude-slider"
         />
         <div class="altitude-label">{{ Math.round(altitude) }}</div>
@@ -28,6 +28,8 @@
 </template>
 
 <script>
+import { debounce } from 'lodash';
+
 export default {
   data() {
     return {
@@ -56,6 +58,13 @@ export default {
     },
   },
   methods: {
+
+
+  updateImageDebounced: debounce(function() {
+    this.imageIndex = Math.floor(this.altitude / this.imageInterval);
+    this.currentImage = require(`@/assets/images/excursion/mapRelief/map-${this.imageIndex * 200}-min.jpg`).default;
+  }, 100), 
+  
   playVideo() {
       const videoElement = this.$refs.videoElement;
       console.log("go")
