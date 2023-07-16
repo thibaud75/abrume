@@ -113,8 +113,9 @@ export default {
 .map-image {
   display: block;
   max-width: 100%;
-  max-height: 88vh;
+  max-height: 100%;
   width: 100vw;
+  height: 100vh;
   object-fit: cover;
 }
 
