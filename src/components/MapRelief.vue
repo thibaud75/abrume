@@ -116,7 +116,7 @@ export default {
 .fullscreen-video {
   /* width: 100%;
   height: 100%; */
-  object-fit: cover;
+  object-fit:fill;
   max-width: 100%;
   max-height: 88vh;
   width: 100vw;
